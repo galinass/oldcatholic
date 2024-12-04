@@ -1,0 +1,18 @@
+global:
+  scrape_interval: 15s
+
+scrape_configs:
+  - job_name: 'prometheus'
+    static_configs:
+      - targets: ['localhost:9090']
+  - job_name: 'wordpress'
+    static_configs:
+      - targets: ['wordpress_exporter:8080']
+  - job_name: 'mysql'
+    static_configs:
+      - targets: ['mysql_exporter:9104']
+  - job_name: 'node'
+    static_configs:
+      - targets: ['node_exporter:9100']
+
+

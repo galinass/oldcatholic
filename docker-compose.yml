@@ -1,0 +1,93 @@
+version: '3.8'
+
+services:
+  nginx:
+    image: nginx:latest
+    container_name: nginx_container
+    ports:
+      - "8081:80"
+      - "443:443"
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf
+    networks:
+      - catholic
+
+  mysql:
+    image: mysql:5.7
+    container_name: mysql_container
+    environment:
+      MYSQL_ROOT_PASSWORD: galinas
+      MYSQL_DATABASE: oldcatholic
+      MYSQL_USER: galinas
+      MYSQL_PASSWORD: galinas
+    volumes:
+      - mysql_data:/var/lib/mysql
+    networks:
+      - catholic
+
+  wordpress:
+    image: wordpress:latest
+    container_name: wordpress_container
+    environment:
+      WORDPRESS_DB_HOST: mysql:3306
+      WORDPRESS_DB_NAME: oldcatholic
+      WORDPRESS_DB_USER: galinas
+      WORDPRESS_DB_PASSWORD: galinas
+    ports:
+      - "8080:80"
+    networks:
+      - catholic
+
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: prometheus_container
+    volumes:
+      - ./prometheus.yml:/etc/prometheus/prometheus.yml
+    ports:
+      - "9090:9090"
+    networks:
+      - catholic
+
+  grafana:
+    image: grafana/grafana:latest
+    container_name: grafana_container
+    ports:
+      - "3000:3000"
+    environment:
+      GF_SECURITY_ADMIN_PASSWORD: galinas
+    networks:
+      - catholic
+
+  wordpress_exporter:
+    image: wordpress_exporter:latest
+    container_name: wordpress_exporter
+    ports:
+      - "9117:9117"
+    networks:
+      - catholic
+
+  mysql_exporter:
+    image: prom/mysqld-exporter:v0.12.1
+    container_name: mysql_exporter
+    environment:
+      DATA_SOURCE_NAME: "galinas:galinas@(mysql_container:3306)/"
+    volumes:
+    - /home/galinas/.my.cnf:/root/.my.cnf:ro
+    networks:
+      - catholic
+
+  node_exporter:
+    image: prom/node-exporter:latest
+    container_name: node_exporter
+    ports:
+      - "9101:9100"
+    networks:
+      - catholic
+
+volumes:
+  mysql_data:
+
+networks:
+  catholic:
+    driver: bridge
+
